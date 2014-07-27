@@ -59,11 +59,11 @@ To use it, you refer to it by ID (in this case 'tmpl')
 
 *Note:* there are two steps to use ajax loaded templates
 
-1. Setup remote loading for template in the controller
+A. Setup remote loading for template in the controller
 
     this.tmpl = m.template.load("tmpl.js");
 
-2. To use it from within another template
+B. Use it from within another template
 
     m.template(data.inputTmpl(), data)
 
