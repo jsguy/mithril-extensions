@@ -1,5 +1,4 @@
 # mithril-extensions
-====================
 
 This set of extensions for mithril exist to address the following:
 
