@@ -31,18 +31,6 @@ It works the same as normal mithril tags, and can be compiled and optimised just
 
 The templating system brings together the ability to add templates in the controller, inside the dom or loaded via ajax - all able to be nested.
 
-### In-controller template
-
-    this.tmpl = function(data){
-        with(m.sugarTags) {
-            return DIV("This is my template")
-        };
-    };
-
-To use it, you can call the template function
-
-    m.template(data.tmpl, data)
-
 ### In-dom template
 
 *Note:* you must set the type as "text/mithrill" for it to work correcty
@@ -66,4 +54,16 @@ A. Setup remote loading for template in the controller
 B. Use it from within another template
 
     m.template(data.inputTmpl(), data)
+
+### In-controller template
+
+    this.tmpl = function(data){
+        with(m.sugarTags) {
+            return DIV("This is my template")
+        };
+    };
+
+To use it, you can call the template function
+
+    m.template(data.tmpl, data)
 
