@@ -1,0 +1,77 @@
+<html>
+<head>
+  <title></title>
+  <script src="mithril.js"></script>
+  <script src="mithril.sugartags.js"></script>
+  <script src="mithril.template.js"></script>
+  <style>
+    .hide { display: none; }
+  </style>
+</head>
+<body>
+
+<div id="content"></div>
+
+
+<script>
+//  Example of bi-directional data binding
+var user = {
+    model: function(firstName, lastName) {
+        this.firstName = m.prop(firstName);
+        this.lastName = m.prop(lastName);
+        this.email = m.prop();
+    },
+    controller: function() {
+        var self = this;
+        self.user = new user.model("John", "Doe");
+        // setTimeout(function(){
+        //   m.startComputation();
+        //   //  Set the value in the input
+        //   self.user.name("John Smith");
+        //  m.endComputation();
+        // }, 1000);
+        setInterval(function(){
+          console.log('value', this.user);
+        }, 2000);
+    },
+    submit: function(e){
+      e.preventDefault();
+      console.log('submit', this.user);
+      alert('e');
+      return false;
+    },
+    view: function(ctrl) {
+        // return [
+        //     m("input", {
+        //       onchange: m.withAttr("value", ctrl.user.name), 
+        //       value: ctrl.user.name()
+        //     })
+        // ];
+
+
+      return m("form", binds(ctrl.user), [
+          m("input[name=first]", {value: ctrl.user.firstName()}),
+          m("input[name=last]", {value: ctrl.user.lastName()}),
+          m("input[name=email]", {value: ctrl.user.email()}),
+          m("button", {onclick: ctrl.submit}, "Save")
+      ]);
+
+    }
+};
+
+
+//data binding helper function
+function binds(data) {
+  return {onchange: function(e) {
+    data[e.target.name] = e.target.value;
+  }};
+};
+
+
+
+//initialize
+m.module(document.body, user);
+</script>
+
+</body>
+</html>

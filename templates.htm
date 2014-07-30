@@ -28,6 +28,26 @@
 	])
 </script>
 
+<!-- Main template (embedded) -->
+<script>
+	m.template.define('list', function(data){
+		with(m.sugarTags) {
+			return DIV([
+				//	Use an embedded template
+				m.template('listHeader'),
+				//	Uses a ajax loaded template
+				LABEL(m.template(data.inputTmpl(), data)),
+				UL( {class: "listy"}, [
+					data.links.map(function(link) {
+						//	Use a template function
+						return m.template(data.listItem, link);
+					})
+				])
+			]);
+		}
+	});
+</script>
+
 <!-- Header template (embedded) -->
 <script id="listHeader" type="text/mithrill">
 	H1("Mithril templates")
@@ -66,7 +86,8 @@
 		},
 		view: function(ctrl) {
 			return [
-				m.template('list', ctrl)
+				//m.template('list', ctrl)
+				m.template.render('list', ctrl)
 			];
 		}
 	};

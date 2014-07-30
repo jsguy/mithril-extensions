@@ -4,6 +4,8 @@
 (function(context){
 	context.m = context.m || {};
 
+	context.m.templates = {};
+
 	//	Returns a template from either a function or string
 	//	Note: use 'data' as the variable for the data
 	context.m.template = function(tmpl, data){
@@ -39,4 +41,16 @@
 			}
 		});
 	};
+
+	//	Defines a template for later use
+	context.m.template.define = function(name, tmpl){
+		context.m.templates[name] = tmpl;
+	};
+
+
+	//	Renders a defined template
+	context.m.template.render = function(name, data){
+		return context.m.template(context.m.templates[name], data);
+	};
+
 }(window));
