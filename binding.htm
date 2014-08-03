@@ -1,7 +1,7 @@
 <html>
 <head>
   <title></title>
-  <script src="mithril.js"></script>
+  <script src="../mithril.js/mithril.js"></script>
   <script src="mithril.sugartags.js"></script>
   <script src="mithril.template.js"></script>
   <style>
@@ -12,26 +12,21 @@
 
 <div id="content"></div>
 
-
 <script>
 //  Example of bi-directional data binding
-var user = {
+var userApp = {
     model: function(firstName, lastName) {
         this.firstName = m.prop(firstName);
         this.lastName = m.prop(lastName);
-        this.email = m.prop();
+        this.email = m.prop("");
     },
     controller: function() {
         var self = this;
-        self.user = new user.model("John", "Doe");
-        // setTimeout(function(){
-        //   m.startComputation();
-        //   //  Set the value in the input
-        //   self.user.name("John Smith");
-        //  m.endComputation();
-        // }, 1000);
-        setInterval(function(){
-          console.log('value', this.user);
+        window.model = self.user = new userApp.model("John", "Doe");
+
+        setTimeout(function(){
+          console.log('hello');
+          self.user.email("hello@world.com");
         }, 2000);
     },
     submit: function(e){
@@ -41,36 +36,63 @@ var user = {
       return false;
     },
     view: function(ctrl) {
-        // return [
-        //     m("input", {
-        //       onchange: m.withAttr("value", ctrl.user.name), 
-        //       value: ctrl.user.name()
-        //     })
-        // ];
-
-
       return m("form", binds(ctrl.user), [
-          m("input[name=first]", {value: ctrl.user.firstName()}),
-          m("input[name=last]", {value: ctrl.user.lastName()}),
-          m("input[name=email]", {value: ctrl.user.email()}),
-          m("button", {onclick: ctrl.submit}, "Save")
+          m("input[name=firstName]", {value: ctrl.user.firstName()}),
+          m("input[name=lastName]", {value: ctrl.user.lastName()}),
+          m("input[name=email]", {value: ctrl.user.email(), onchange: m.withAttr("value", ctrl.user.email)}),
+          m("button", {type: "button", onclick: ctrl.submit}, "Save")
       ]);
 
     }
 };
 
 
-//data binding helper function
-function binds(data) {
-  return {onchange: function(e) {
-    data[e.target.name] = e.target.value;
-  }};
+//  data binding helper function
+//  This is one-way only...
+//  TODO: 2 way
+function binds(data, aggressive) {
+  var events = ['change'],
+    setValue = function(key, value, data) {
+      if(typeof data[key] === 'function') {
+        data[key](value);
+      } else {
+        data[key] = value;
+      }
+    }, obj = {};
+
+  if(aggressive) {
+    events.push('keyup');
+  }
+
+  for(var i = 0; i < events.length; i += 1) {
+    obj['on' + events[i]] = function(e) {
+/*
+      //onchange: m.withAttr("value", data.user.name), 
+  m.withAttr = function(prop, withAttrCallback) {
+
+    return function(e) {
+      e = e || event
+      withAttrCallback(prop in e.currentTarget ? e.currentTarget[prop] : e.currentTarget.getAttribute(prop))
+    }
+
+  }
+*/
+    //onchange: m.withAttr("value", data.user.name), ==>
+
+    var onchange = function(e){
+      e = e || event;
+      withAttrCallback('value' in e.currentTarget ? e.currentTarget['value'] : e.currentTarget.getAttribute('value'))
+
+    }
+
+      setValue(e.target.name, e.target.value, data);
+    };
+  }
+  return obj;
 };
 
-
-
 //initialize
-m.module(document.body, user);
+m.module(document.body, userApp);
 </script>
 
 </body>

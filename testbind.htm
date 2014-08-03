@@ -1,0 +1,77 @@
+<html>
+<head>
+  <title></title>
+  <script src="../mithril.js/mithril.js"></script>
+  <script src="mithril.sugartags.js"></script>
+  <script src="mithril.template.js"></script>
+  <style>
+    .hide { display: none; }
+  </style>
+</head>
+<body>
+
+<div id="content"></div>
+
+<script>
+  m.customBindings = {
+
+    //                binder(node, tag, dataAttr);
+    valueInit: function(node, tag, prop){
+      console.log('valueInit', arguments);
+
+
+      // node.onchange = function(e) {
+      //   e = e || event;
+      //   var prop = 'value',
+      //     value = prop in e.currentTarget ? e.currentTarget[prop] : e.currentTarget.getAttribute(prop);
+      //   dataAttr(value);
+
+      //   console.log('change', prop, value);
+      // };
+      node.onchange = m.autoRedraw(m.withAttr("value", prop), node);
+      node.value = prop();
+      // node.onchange = m.withAttr("value", prop);
+    }
+  };
+</script>
+
+<script>
+//  Example of bi-directional data binding
+var user = {
+    model: function(name) {
+        this.name = m.prop(name);
+    },
+    controller: function() {
+        var self = this;
+        window.model = self.user = new user.model("John Doe");
+        setTimeout(function(){
+          m.startComputation();
+          //  Set the value in the input
+          self.user.name("John Smith");
+         m.endComputation();
+        }, 1000);
+
+        setInterval(function(){
+          console.log(self.user.name());
+        }, 2000);
+
+
+    },
+    view: function(data) {
+        return [
+            m("input", {
+              valueInit: data.user.name
+              // onchange: m.withAttr("value", data.user.name), 
+              // value: data.user.name()
+            })
+        ];
+    }
+};
+
+//initialize
+m.module(document.body, user);
+
+</script>
+
+</body>
+</html>
