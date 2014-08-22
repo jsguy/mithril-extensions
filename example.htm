@@ -1,0 +1,50 @@
+<html>
+<head>
+	<title></title>
+	<script src="../mithril.js/mithril.js"></script>
+	<script src="../mithril.bindings/mithril.bindings.js"></script>
+	<script src="../mithril.sugartags/mithril.sugartags.js"></script>
+	<script src="../mithril.templates/mithril.templates.js"></script>
+</head>
+<body>
+<h1>Mithril.bindings - bi-directionally bound value</h1>
+<div id="content"></div>
+
+<button type="button" id="setValueButton">Set name</button>
+
+<script>
+//	Basic bi-directional data binding
+var app = {
+	model: function(name) {
+		this.name = m.p(name);
+		this.hide = m.p();
+	},
+	controller: function() {
+		window.model = this.user = new app.model("John Doe");
+	},
+	view: function(data) {
+		var u = data.user;
+		with(m.sugarTags) { return [
+			H1({ text: u.name }),
+			BUTTON({ type: "button", toggle: u.hide }, "Toggle hide"),
+			DIV({ hide: u.hide }, [
+				INPUT({ name: "name", value: u.name }),
+				DIV("Model name value: " + u.name())
+			])
+		]}
+	}
+};
+
+//initialize
+m.module(document.getElementById('content'), app);
+</script>
+
+<script>
+//	Demonstrate external access to the model
+document.getElementById('setValueButton').onclick = function(){
+	model.name("John Smith");
+};
+</script>
+
+</body>
+</html>

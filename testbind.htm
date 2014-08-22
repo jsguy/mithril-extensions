@@ -2,8 +2,8 @@
 <head>
   <title></title>
   <script src="../mithril.js/mithril.js"></script>
-  <script src="mithril.sugartags.js"></script>
-  <script src="mithril.template.js"></script>
+  <script src="../mithril.sugartags/mithril.sugartags.js"></script>
+  <script src="../mithril.templates/mithril.templates.js"></script>
   <style>
     .hide { display: none; }
   </style>
@@ -14,29 +14,18 @@
 
 <script>
   m.customBindings = {
-
-    //                binder(node, tag, dataAttr);
     valueInit: function(node, tag, prop){
-      console.log('valueInit', arguments);
-
-
-      // node.onchange = function(e) {
-      //   e = e || event;
-      //   var prop = 'value',
-      //     value = prop in e.currentTarget ? e.currentTarget[prop] : e.currentTarget.getAttribute(prop);
-      //   dataAttr(value);
-
-      //   console.log('change', prop, value);
-      // };
-      node.onchange = m.autoRedraw(m.withAttr("value", prop), node);
       node.value = prop();
-      // node.onchange = m.withAttr("value", prop);
+
+      //node.onchange = m.autoRedraw(m.withAttr("value", prop), node);
+      node.onchange = m.withAttr("value", prop);
+      return prop();
     }
   };
 </script>
 
 <script>
-//  Example of bi-directional data binding
+//  Bi-directional data binding using custom bindings
 var user = {
     model: function(name) {
         this.name = m.prop(name);
@@ -48,21 +37,18 @@ var user = {
           m.startComputation();
           //  Set the value in the input
           self.user.name("John Smith");
-         m.endComputation();
-        }, 1000);
+          m.endComputation();
+        }, 2000);
 
         setInterval(function(){
           console.log(self.user.name());
-        }, 2000);
-
-
+        }, 1000);
     },
     view: function(data) {
         return [
             m("input", {
+              name: "name",
               valueInit: data.user.name
-              // onchange: m.withAttr("value", data.user.name), 
-              // value: data.user.name()
             })
         ];
     }

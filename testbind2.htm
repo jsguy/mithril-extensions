@@ -1,0 +1,118 @@
+<html>
+<head>
+	<title></title>
+	<script src="../mithril.js/mithril.js"></script>
+	<script src="../mithril.sugartags/mithril.sugartags.js"></script>
+	<script src="../mithril.templates/mithril.templates.js"></script>
+
+
+	<script>
+		//model property which is subscribable
+		var p = function(value) {
+			var self = this,
+				subs = [],
+				prevValue,
+				delay = false,
+				//  Send notifications to subscribers
+				notify = function (value) {
+					var i;
+					for (i = 0; i < subs.length; i += 1) {
+						subs[i].func.apply(subs[i].context, [value]);
+					}
+				};
+				prop = function() {
+					if (arguments.length) {
+						value = arguments[0];
+						if (prevValue !== value) {
+							prevValue = value;
+							notify(value);
+						}
+					}
+					return value
+				};
+
+			prop.toJSON = function() {
+				return value;
+			}
+
+			prop.subscribe = function (func, context) {
+				subs.push({ func: func, context: context || self });
+				return prop;
+			};
+
+			prop.delay = function(value){
+				delay = !!value;
+				return prop;
+			};
+
+			prop.subscribe(function(val){
+				if(!delay) {
+					m.startComputation();
+					m.endComputation();
+				}
+				return prop;
+			});
+
+			return prop;
+		};
+
+
+
+	</script>
+
+
+	<style>
+		.hide { display: none; }
+	</style>
+</head>
+<body>
+
+<div id="content"></div>
+
+<script>
+	m.customBindings = {
+		valueInit: function(node, tag, prop){
+			node.value = prop();
+			//node.onchange = m.autoRedraw(m.withAttr("value", prop), node);
+			node.onchange = m.withAttr("value", prop);
+			return prop();
+		}
+	};
+</script>
+
+<script>
+//  Bi-directional data binding using custom bindings
+var user = {
+		model: function(name) {
+			//this.name = m.prop(name);
+			this.name = p(name).delay(true);
+		},
+		controller: function() {
+			var self = this;
+			window.model = self.user = new user.model("John Doe");
+			setTimeout(function(){
+				//  Set the value in the input
+				self.user.name("John Smith");
+			}, 2000);
+
+			setInterval(function(){
+				console.log(self.user.name());
+			}, 1000);
+		},
+		view: function(data) {
+			return [
+				m("input", {
+					name: "name",
+					valueInit: data.user.name
+				})
+			];
+		}
+};
+
+//initialize
+m.module(document.body, user);
+
+</script>
+
+</body>
+</html>
