@@ -1,0 +1,106 @@
+<html>
+<head>
+	<title></title>
+	<script src="mithril.js"></script>
+	<script src="../../mithril.bindings/mithril.bindings.js"></script>
+	<script src="../../mithril.sugartags/mithril.sugartags.js"></script>
+	<script src="../../mithril.templates/mithril.templates.js"></script>
+
+	
+	<script src="jquery-1.11.1.js"></script>
+
+	<style>
+		.done { text-decoration: line-through; }
+	</style>
+</head>
+<body>
+	<script>
+	//  Fadeout via boolean value on click
+	m.addBinding('fadeout', function(prop){
+		this.onclick = function(){
+			$(this).fadeOut(function() {
+				prop(false);
+			});
+		}
+	});
+
+	</script>
+
+<div id="content"></div>
+
+<script>
+//  Basic todo app
+var app = {
+	model: function() {
+		var self = this;
+		
+		self.selectValue = m.p();
+		self.options = m.p([
+			{ value: '', text: 'Select an option' },
+			{ value: 'key1', text: 'Label 1' },
+			{ value: 'key2', text: 'Label 2' }
+		]);
+		
+		self.todos = m.p([
+			{ text: "learn mithril", done: m.p(true) },
+			{ text: "build a mithril app", done: m.p(false) }
+		]);
+		self.input = m.p("");
+		self.remaining = function(){
+			var count = 0;
+			self.todos().map(function(todo) {
+				count += todo.done() ? 0 : 1;
+			});
+			return count;
+		};
+		self.archive = function(){
+			var list = [];
+			self.todos().map(function(todo) {
+				if(!todo.done()) { list.push(todo); }
+			});
+			self.todos(list);
+		};
+		self.addTodo = function(){
+			var value = self.input();
+			if(value) {
+				//  Using bindings model push for arrays
+				self.todos.push({text: value, done: m.p(false)});
+				self.input("");
+			}
+			return false;
+		};
+	},
+	controller: function() {
+		window.model = this.model = new app.model();
+		//this.tmpl = m.template.load("todoapp.tmpl.js");
+	},
+	view: function(ctrl) {
+		//return m.template(data.tmpl(), data.model);
+		var data = ctrl.model;
+		with(m.sugarTags) { return [
+			H1("Mithril bindings Todos - " + data.remaining() + " of " + data.todos().length + " remaining"),
+			BUTTON({ onclick: data.archive }, "Archive"),
+			UL([
+				data.todos().map(function(todo, idx){
+					return LI({ class: todo.done()? "done": "", fadeout: todo.done }, todo.text);
+				})
+			]),
+			FORM({ onsubmit: data.addTodo }, [
+				SELECT({ value: data.selectValue }, [
+					data.options().map(function(opt) {
+						return m('option', {value: opt.value}, opt.text);
+					})
+				]),
+				INPUT({ type: "text", value: data.input, placeholder: "Add todo" }),
+				BUTTON({ type: "submit"}, "Add")
+			])
+		]}
+	}
+};
+
+//initialize
+m.module(document.getElementById("content"), app);
+</script>
+
+</body>
+</html>
