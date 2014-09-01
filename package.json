@@ -1,0 +1,33 @@
+{
+	"name": "tabjs",
+	"version": "0.0.1",
+	"author": "JavaScript guy <mikkel@jsguy.com>",
+	"description": "Mithril extensions - Virtual DOM MVC framework",
+	"contributors": [{
+		"name": "Mikkel Bergmann",
+		"email": "mikkel@jsguy.com"
+	}],
+	"bin": {
+		"tabjs": "./dist/tab.min.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/jsguy/tabjs.git"
+	},
+	"keywords": [
+		"Mithril",
+		"useful",
+		"jsguy"
+	],
+	"devDependencies": {
+		"mithril": "~0.1.21",
+		"grunt":  "0.4.x",
+		"grunt-cli":  "0.1.9",
+		"grunt-contrib-uglify":  "0.2.x",
+		"grunt-contrib-jshint":  "0.6.x",
+		"grunt-contrib-qunit":  "0.2.x",
+		"grunt-contrib-watch":  "0.4.x",
+		"grunt-contrib-concat":  "0.3.x"
+	},
+	"license": "MIT"
+}
