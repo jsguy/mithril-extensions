@@ -11,66 +11,44 @@
 <div id="content"></div>
 
 <script>
-var autocompleter = {
-    model: {
+var autocompleter = {};
 
-    },
-    controller: function(data, getter) {
-        this.value = m.prop("");
-        this.data = m.prop([]);
-        this.getter = getter;
+autocompleter.controller = function(data, getter) {
+    //binding for the text input
+    this.value = m.prop("");
+    //store for the list of items
+    this.data = m.prop([]);
 
-        console.log('x', data, getter);
+    //method to determine what property of a list item to compare the text input's value to
+    this.getter = getter;
 
-        //  Changes the list depending on input
-        this.change = function(value) {
-            this.value(value);
+    //this method changes the relevance list depending on what's currently in the text input
+    this.change = function(value) {
+        this.value(value);
 
-            var list = value === "" ? 
-                []: 
-                data.filter(function(item) {
-                    return this.getter(item)
-                        .toLowerCase()
-                        .indexOf(value.toLowerCase()) > -1;
-                }, this);
-            this.data(list);
-        };
+        var list = value === "" ? [] : data.filter(function(item) {
+            return this.getter(item).toLowerCase().indexOf(value.toLowerCase()) > -1;
+        }, this);
+        this.data(list);
+    };
 
-        //  When an option is selected
-        this.select = function(value) {
-            this.value(value);
-            this.data([]);
-            if (this.onchange) {
-                this.onchange({
-                    currentTarget: {
-                        value: value
-                    }
-                });
-            }
-        };
-    },
+    //this method is called when an option is selected. It triggers an `onchange` event
+    this.select = function(value) {
+        this.value(value);
+        this.data([]);
+        if (this.onchange) this.onchange({currentTarget: {value: value}});
+    };
+}
 
-    view: function(ctrl, options) {
-        if (options) ctrl.onchange = options.onchange;
-        with(m.sugarTags){
-            return [
-                INPUT({
-                    oninput: m.withAttr("value", ctrl.change.bind(ctrl)), 
-                    value: ctrl.value()
-                }),
-                ctrl.data().map(function(item) {
-                    return DIV({
-                        data: ctrl.getter(item), 
-                        onclick: m.withAttr("data", ctrl.select.bind(ctrl))}, 
-                        ctrl.getter(item)
-                    );
-                })
-            ];
-        }
-    }
-
-};
-
+autocompleter.view = function(ctrl, options) {
+    if (options) ctrl.onchange = options.onchange;
+    return [
+        m("input", {oninput: m.withAttr("value", ctrl.change.bind(ctrl)), value: ctrl.value()}),
+        ctrl.data().map(function(item) {
+            return m("div", {data: ctrl.getter(item), onclick: m.withAttr("data", ctrl.select.bind(ctrl))}, ctrl.getter(item));
+        })
+    ];
+}
 
 
 //here's an example of using the autocompleter

@@ -5,116 +5,92 @@
     <script src="../mithril.bindings/mithril.bindings.js"></script>
     <script src="../mithril.sugartags/mithril.sugartags.js"></script>
     <script src="../mithril.templates/mithril.templates.js"></script>
+    <style>
+        .listItem { padding: 0.5em; background: #efefef; margin: 0.1em; width: 10em; font-family: sans-serif; }
+    </style>
 </head>
 <body>
 
 <div id="content"></div>
 
 <script>
-var autocompleter = {
-    model: function(){
-        this.value = m.p("");
-        this.data = m.p([]);
-    },
-    controller: function(data, getter) {
-        this.getter = getter;
-        var model = this.model = new autocompleter.model();
+/*  A re-implementation of the autocomplete example, using Mithril extensions 
 
-        //  When the value changes, update the list
-        model.value.subscribe(function(value){
-            var list = value === "" ? 
-                []: 
-                data.filter(function(item) {
-                    return getter(item)
-                        .toLowerCase()
+
+*/
+var autocompleter = {
+    //  Data related items go in the model
+    model: function(data, getter){
+        var self = this;
+        self.data = m.p(data);
+        self.list = m.p([]);
+        self.value = m.p("").subscribe(function(value){
+            //  When the value changes, update the list
+            var list = value === "" ? []:
+                self.data().filter(function(item) {
+                    return getter(item).toLowerCase()
                         .indexOf(value.toLowerCase()) > -1;
                 }, this);
-            model.data(list);
+            self.list(list);
         });
 
-        //  Changes the list depending on input
-        this.change = function(value) {
-            this.model.value(value);
-
-            var list = value === "" ? 
-                []: 
-                data.filter(function(item) {
-                    return this.getter(item)
-                        .toLowerCase()
-                        .indexOf(value.toLowerCase()) > -1;
-                }, this);
-            this.model.data(list);
-        };
-
-        //  When an option is selected
-        this.select = function(value) {
-            this.model.value(value);
-            this.model.data([]);
-            if (this.onchange) {
-                this.onchange({
-                    currentTarget: {
-                        value: value
-                    }
-                });
-            }
-        };
+        self.selectedValue = m.p().subscribe(function(value) {
+            self.value(value);
+            self.list([]);
+        });
     },
 
-    view: function(ctrl, options) {
-        if (options) ctrl.onchange = options.onchange;
-        with(m.sugarTags){
-            return [
-                // INPUT({
-                //     oninput: m.withAttr("value", ctrl.change.bind(ctrl)), 
-                //     value: ctrl.model.value()
-                // }),
-                INPUT({valueInput: ctrl.model.value}),
-                ctrl.model.data().map(function(item) {
-                    return DIV({
-                        data: ctrl.getter(item), 
-                        onclick: m.withAttr("data", ctrl.select.bind(ctrl))
-                    },
-                    ctrl.getter(item)
-                    );
-                })
-            ];
-        }
+    //  Controller controls things
+    controller: function(data, getter, decorator) {
+        this.getter = getter;
+        this.decorator = decorator;
+        this.model = new autocompleter.model(data, getter, decorator);
+    },
+
+    //  View generates html
+    view: function(ctrl) {
+        return [
+            INPUT({valueInput: ctrl.model.value}),
+            ctrl.model.list().map(function(item) {
+                return DIV({
+                    data: ctrl.getter(item),
+                    onclick: m.withAttr("data", ctrl.model.selectedValue)
+                }, ctrl.decorator(item));
+            })
+        ];
     }
-
 };
 
+//  autocompleter instance
+var acInstance = {
+    controller: function() {
+        var names = [
+            {id: 1, name: "John"},
+            {id: 2, name: "Bob"},
+            {id: 3, name: "Mary"},
+            {id: 4, name: "Larry"},
+            {id: 5, name: "Barry"}
+        ],
+        //  Retrieves an item in the list
+        getter = function(item) {
+            return item.name;
+        },
+        //  Displays an item from the list
+        decorator = function(item) {
+            return DIV({class: "listItem"}, item.name);
+        };
 
-
-//here's an example of using the autocompleter
-var dashboard = {}
-
-dashboard.controller = function() {
-    this.names = m.p([
-        {id: 1, name: "John"},
-        {id: 2, name: "Bob"},
-        {id: 2, name: "Mary"}
-    ]);
-    
-    var x = this.names();
-
-    console.log(x);
-
-    this.autocompleter = new autocompleter.controller(x, function(item) {
-        return item.name;
-    });
+        this.autocompleter = new autocompleter.controller(names, getter, decorator);
+    },
+    view: function(ctrl) {
+        return m("#example", [
+            new autocompleter.view(ctrl.autocompleter),
+        ]);
+    }
 };
-
-dashboard.view = function(ctrl) {
-    return m("#example", [
-        new autocompleter.view(ctrl.autocompleter, {onchange: m.withAttr("value", console.log)}),
-    ]);
-};
-
-
 
 //initialize
-m.module(document.getElementById('content'), dashboard);
-
+m.module(document.getElementById('content'), acInstance);
 </script>
 
 </body>
