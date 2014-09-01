@@ -1,0 +1,71 @@
+<html>
+<head>
+	<title></title>
+	<script src="mithril.js"></script>
+	<script src="../../mithril.bindings/mithril.bindings.js"></script>
+	<script src="../../mithril.sugartags/mithril.sugartags.js"></script>
+	<script src="../../mithril.templates/mithril.templates.js"></script>
+	<style>
+		.allBoxes { font-weight: bold }
+	</style>
+</head>
+<body>
+
+<div id="content"></div>
+
+<script>
+var app = {
+	model: function() {
+		var self = this;
+		self.boxes = [];
+		for(var i = 0; i < 3; i += 1) {
+			self.boxes.push(m.p());
+		}
+		//	Use a delayed property - no need to render
+		self.allBoxesObj = m.p().delay(true);
+		//	The "all boxes" checkbox
+		self.allBoxes = function() {
+			var i, isChecked = true;
+			for(i = 0; i < self.boxes.length; i += 1) {
+				if(! self.boxes[i]()) {
+					isChecked = false;
+					break;
+				}
+			}
+			self.allBoxesObj(isChecked);
+			return isChecked;
+		};
+		//	Set all checkboxes to checked
+		self.clickAllBoxes = function(){
+			var isChecked = self.allBoxesObj(!self.allBoxesObj()), i;
+			for(i = 0; i < self.boxes.length; i += 1) {
+				self.boxes[i](isChecked);
+			}
+		};
+	},
+	view: function(c) {
+		return [
+			DIV([
+				DIV([
+					INPUT({ type: "checkbox", value: "all", id: "allBoxes", onclick: c.model.clickAllBoxes, checked: c.model.allBoxes }),
+					LABEL({ "for": "allBoxes", class: "allBoxes"}, "All boxes" )
+				]),
+				c.model.boxes.map(function(box, idx){
+					return DIV([
+						INPUT({ type: "checkbox", value: idx, id: "b" + idx, checked: box }),
+						LABEL({ "for": "b" + idx}, "Box " + (idx + 1) )
+					]);
+				})
+			])
+		];
+	},
+	controller: function() {
+		this.model = new app.model();
+	}
+};
+
+m.module(document.getElementById('content'), app);
+
+</script>
+</body>
+</html>
