@@ -5,26 +5,11 @@
 	<script src="../../mithril.bindings/mithril.bindings.js"></script>
 	<script src="../../mithril.sugartags/mithril.sugartags.js"></script>
 	<script src="../../mithril.templates/mithril.templates.js"></script>
-
-	
-	<script src="jquery-1.11.1.js"></script>
-
 	<style>
 		.done { text-decoration: line-through; }
 	</style>
 </head>
 <body>
-	<script>
-	//  Fadeout via boolean value on click
-	m.addBinding('fadeout', function(prop){
-		this.onclick = function(){
-			$(this).fadeOut(function() {
-				prop(false);
-			});
-		}
-	});
-
-	</script>
 
 <div id="content"></div>
 
@@ -34,16 +19,15 @@ var app = {
 	model: function() {
 		var self = this;
 		
-		self.selectValue = m.p();
+		self.tag = m.p('normal');
 		self.options = m.p([
-			{ value: '', text: 'Select an option' },
-			{ value: 'key1', text: 'Label 1' },
-			{ value: 'key2', text: 'Label 2' }
+			{ value: 'normal', text: 'Normal' },
+			{ value: 'important', text: 'Important' }
 		]);
 		
 		self.todos = m.p([
-			{ text: "learn mithril", done: m.p(true) },
-			{ text: "build a mithril app", done: m.p(false) }
+			{ text: "learn mithril", done: m.p(true), tag: "important" },
+			{ text: "build a mithril app", done: m.p(false), tag: "normal" }
 		]);
 		self.input = m.p("");
 		self.remaining = function(){
@@ -64,7 +48,7 @@ var app = {
 			var value = self.input();
 			if(value) {
 				//  Using bindings model push for arrays
-				self.todos.push({text: value, done: m.p(false)});
+				self.todos.push({text: value, done: m.p(false), tag: self.tag()});
 				self.input("");
 			}
 			return false;
@@ -82,13 +66,13 @@ var app = {
 			BUTTON({ onclick: data.archive }, "Archive"),
 			UL([
 				data.todos().map(function(todo, idx){
-					return LI({ class: todo.done()? "done": "", fadeout: todo.done }, todo.text);
+					return LI({ class: todo.done()? "done": "", toggle: todo.done }, "[" + todo.tag + "] " + todo.text);
 				})
 			]),
 			FORM({ onsubmit: data.addTodo }, [
-				SELECT({ value: data.selectValue }, [
+				SELECT({ value: data.tag }, [
 					data.options().map(function(opt) {
-						return m('option', {value: opt.value}, opt.text);
+						return OPTION({ value: opt.value }, opt.text);
 					})
 				]),
 				INPUT({ type: "text", value: data.input, placeholder: "Add todo" }),

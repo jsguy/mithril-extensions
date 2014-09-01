@@ -12,19 +12,29 @@
 
 <script>
 var autocompleter = {
-    model: {
-
+    model: function(){
+        this.value = m.p("");
+        this.data = m.p([]);
     },
     controller: function(data, getter) {
-        this.value = m.prop("");
-        this.data = m.prop([]);
         this.getter = getter;
+        var model = this.model = new autocompleter.model();
 
-        console.log('x', data, getter);
+        //  When the value changes, update the list
+        model.value.subscribe(function(value){
+            var list = value === "" ? 
+                []: 
+                data.filter(function(item) {
+                    return getter(item)
+                        .toLowerCase()
+                        .indexOf(value.toLowerCase()) > -1;
+                }, this);
+            model.data(list);
+        });
 
         //  Changes the list depending on input
         this.change = function(value) {
-            this.value(value);
+            this.model.value(value);
 
             var list = value === "" ? 
                 []: 
@@ -33,13 +43,13 @@ var autocompleter = {
                         .toLowerCase()
                         .indexOf(value.toLowerCase()) > -1;
                 }, this);
-            this.data(list);
+            this.model.data(list);
         };
 
         //  When an option is selected
         this.select = function(value) {
-            this.value(value);
-            this.data([]);
+            this.model.value(value);
+            this.model.data([]);
             if (this.onchange) {
                 this.onchange({
                     currentTarget: {
@@ -54,15 +64,17 @@ var autocompleter = {
         if (options) ctrl.onchange = options.onchange;
         with(m.sugarTags){
             return [
-                INPUT({
-                    oninput: m.withAttr("value", ctrl.change.bind(ctrl)), 
-                    value: ctrl.value()
-                }),
-                ctrl.data().map(function(item) {
+                // INPUT({
+                //     oninput: m.withAttr("value", ctrl.change.bind(ctrl)), 
+                //     value: ctrl.model.value()
+                // }),
+                INPUT({valueInput: ctrl.model.value}),
+                ctrl.model.data().map(function(item) {
                     return DIV({
                         data: ctrl.getter(item), 
-                        onclick: m.withAttr("data", ctrl.select.bind(ctrl))}, 
-                        ctrl.getter(item)
+                        onclick: m.withAttr("data", ctrl.select.bind(ctrl))
+                    },
+                    ctrl.getter(item)
                     );
                 })
             ];
