@@ -7,8 +7,12 @@
 	<script src="../mithril.templates/mithril.templates.js"></script>
 	<script src="mithril.animate.js"></script>
 
+
+	<script src="/libs/jquery-1.9.1.js"></script>
+
 	<style>
 		#content { width: 12em; }
+		.fBox { width: 120px; position: absolute; }
 	</style>
 
 
@@ -23,20 +27,31 @@
 
 //	A few basic animations
 m.addBinding("toggleFade", function(prop){
-	var toggle = m.unwrap(prop);
+	var toggle = m.unwrap(prop)? 0: 1;
 	m.animate(this, { 
-		opacity: toggle? 0: 1, 
+		opacity: value, 
 		duration: "0.5s"
 	});
 });
 
 m.addBinding("toggleFadeShrink", function(prop){
-	var toggle = m.unwrap(prop);
+	var value = m.unwrap(prop)? 0: 1;
 	m.animate(this, { 
-		opacity: toggle? 0: 1, 
-		scale: toggle? 0: 1, 
+		opacity: value, 
+		scale: value, 
 		duration: "0.5s" 
 	});
+});
+
+m.addBinding("toggleFadeDown", function(prop){
+	var value = m.unwrap(prop)? 0: 1,
+		props = { 
+			opacity: value, 
+			left: (value * 100) + "px", 
+			duration: "0.5s" 
+		};
+	console.log(props);
+	m.animate(this, props);
 });
 
 </script>
@@ -56,7 +71,7 @@ var app = {
 		return [
 			H1({ text: u.name }),
 			BUTTON({ type: "button", toggle: u.hide }, "Toggle hide"),
-			DIV({ toggleFadeShrink: u.hide }, [
+			DIV({ class: "fBox", toggleFadeDown: u.hide }, [
 				INPUT({ name: "name", value: u.name }),
 				DIV("Model name value: " + u.name())
 			])

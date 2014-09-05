@@ -3,9 +3,8 @@
 	MIT Licensed.
 */
 (function (m) {
-	var div = document.createElement('div'),
 	//	Known prefiex
-	prefixes = ['Moz', 'Webkit', 'Khtml', 'O', 'ms'],
+	var prefixes = ['Moz', 'Webkit', 'Khtml', 'O', 'ms'],
 	transitionProps = ['TransitionProperty', 'TransitionTiming', 'TransitionDelay', 'TransitionDuration', 'TransitionEnd'],
 	transformProps = ['rotate', 'scale', 'skew', 'translate'],
 	
@@ -13,6 +12,9 @@
 	cap = function(str){
 		return str.charAt(0).toUpperCase() + str.substr(1);
 	},
+
+	//	For checking what vendor prefixes are native
+	div = document.createElement('div'),
 
 	//	vendor prefix, ie: transitionDuration becomes MozTransitionDuration
 	vendorProp = function (prop) {
@@ -202,9 +204,11 @@
 				var time = getTimeinMS(props.TransitionDuration) || 0;
 
 				//	Add a timeout to process the next queued transition
-				//	Note: We do not use the native browser callbacks as they won't run if there is nothing to animate.
+				//	Note: We do not use the native browser callbacks,
+				//	(eg: transitionEnd), as they won't run if there is 
+				//	nothing to animate, (eg: try and animate tp the same value), 
+				//	and as such are not useful for us.
 				if(!isNaN(time)) {
-					//	Push a function onto the time queue
 					timeQueue.push(setTimeout(function(){
 						process();
 					}, time));
@@ -226,9 +230,11 @@
 				if(canTrans) {
 					setStyleProps(self, props);
 				} else {
-					//	TODO: Fallback - jQuery would do, but we don't have access to the element.... hmmm...!
-					if(typeof $ !== 'undefined' && $.animate) {
-						//$(self).animate(props, getTimeinMS(props.TransitionDuration));
+					//	Fallback to jQuery - note this will override your elemnets config object!
+					if(typeof $ !== 'undefined' && $.fn && $.fn.animate) {
+						self.config = function(element){
+							$(element).animate(props, getTimeinMS(props.TransitionDuration));
+						}
 					}
 				}
 			};
