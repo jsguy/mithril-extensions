@@ -34,7 +34,7 @@
 <script>
 
 //	A few basic animations
-m.addBinding("toggleFade", function(prop){
+m.addBinding("aniFade", function(prop){
 	var toggle = m.unwrap(prop)? 0: 1;
 	m.animate(this, { 
 		opacity: value, 
@@ -42,7 +42,7 @@ m.addBinding("toggleFade", function(prop){
 	});
 });
 
-m.addBinding("toggleFadeShrink", function(prop){
+m.addBinding("aniFadeShrink", function(prop){
 	var value = m.unwrap(prop)? 0: 1;
 	m.animate(this, { 
 		opacity: value, 
@@ -51,7 +51,7 @@ m.addBinding("toggleFadeShrink", function(prop){
 	});
 });
 
-m.addBinding("toggleFadeDown", function(prop){
+m.addBinding("aniFadeDown", function(prop){
 	var value = m.unwrap(prop)? 0: 1,
 		props = {
 			opacity: value, 
@@ -61,7 +61,7 @@ m.addBinding("toggleFadeDown", function(prop){
 	m.animate(this, props);
 });
 
-m.addBinding("toggleSpinCWFade", function(prop){
+m.addBinding("aniSpinCWFade", function(prop){
 	var value = m.unwrap(prop)? 0: 1,
 		props = {
 			opacity: value, 
@@ -71,7 +71,7 @@ m.addBinding("toggleSpinCWFade", function(prop){
 	m.animate(this, props);
 });
 
-m.addBinding("toggleReverseSpinCCWFade", function(prop){
+m.addBinding("aniReverseSpinCCWFade", function(prop){
 	var value = m.unwrap(prop)? 1: 0,
 		props = {
 			opacity: value, 
@@ -101,19 +101,19 @@ var app = {
 		return [
 			// H1({ text: u.name }),
 			// BUTTON({ type: "button", toggle: u.hide }, "Toggle hide"),
-			// DIV({ class: "fBox", toggleFadeDown: u.hide }, [
+			// DIV({ class: "fBox", aniFadeDown: u.hide }, [
 			// 	INPUT({ name: "name", value: u.name }),
 			// 	DIV("Model name value: " + u.name())
 			// ]),
 
 			// BUTTON({ type: "button", toggle: u.fadeDown }, "Fade down"),
-			// DIV({ class: "eBox", toggleFadeDown: u.fadeDown }),
+			// DIV({ class: "eBox", aniFadeDown: u.fadeDown }),
 
 			//	hehe: http://www.google.com/design/spec/animation/delightful-details.html
 			//BUTTON({ type: "button", toggle: u.spinCWFade }, "Spin CW fade"),
 			DIV({ class: "boxSurround", toggle: u.spinCWFade}, [
-				DIV({ class: "eBox icon", toggleSpinCWFade: u.spinCWFade }),
-				DIV({ class: "eBox alt1 icon", toggleReverseSpinCCWFade: u.spinCWFade })
+				DIV({ class: "eBox icon", aniSpinCWFade: u.spinCWFade }),
+				DIV({ class: "eBox alt1 icon", aniReverseSpinCCWFade: u.spinCWFade })
 			])
 		];
 	}
