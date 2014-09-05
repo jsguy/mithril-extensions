@@ -13,6 +13,13 @@
 	<style>
 		#content { width: 12em; }
 		.fBox { width: 120px; position: absolute; }
+		.eBox { width: 2em; height: 2em; position: absolute; background-color: #ccc; border: 1px solid #c0c0c0; }
+		.eBox.alt1 { background-color: #cfc; border: 1px solid #c0ffc0; opacity: 0; }
+
+		.boxSurround { margin: 1em; }
+
+		.eBox.icon { background-color: inherit; border: none; background-image: url(examples/icons.png); background-repeat: no-repeat; background-position: 0 -32px;  }
+		.eBox.icon.alt1 { background-position: 0 0;  }
 	</style>
 
 
@@ -20,8 +27,9 @@
 <body>
 <h1>Mithril.bindings - bi-directionally bound value</h1>
 <div id="content"></div>
-
+<!--
 <button type="button" id="setValueButton">Set name</button>
+-->
 
 <script>
 
@@ -45,9 +53,29 @@ m.addBinding("toggleFadeShrink", function(prop){
 
 m.addBinding("toggleFadeDown", function(prop){
 	var value = m.unwrap(prop)? 0: 1,
-		props = { 
+		props = {
 			opacity: value, 
-			left: (value * 100) + "px", 
+			top: (value * 100) + "px", 
+			duration: "0.5s" 
+		};
+	m.animate(this, props);
+});
+
+m.addBinding("toggleSpinCWFade", function(prop){
+	var value = m.unwrap(prop)? 0: 1,
+		props = {
+			opacity: value, 
+			rotate: (value * -180) + "deg", 
+			duration: "0.5s" 
+		};
+	m.animate(this, props);
+});
+
+m.addBinding("toggleReverseSpinCCWFade", function(prop){
+	var value = m.unwrap(prop)? 1: 0,
+		props = {
+			opacity: value, 
+			rotate: (value * 180) + "deg", 
 			duration: "0.5s" 
 		};
 	m.animate(this, props);
@@ -61,6 +89,9 @@ var app = {
 	model: function(name) {
 		this.name = m.p(name);
 		this.hide = m.p();
+
+		this.fadeDown = m.p();
+		this.spinCWFade = m.p();
 	},
 	controller: function() {
 		window.model = this.user = new app.model("John Doe");
@@ -68,11 +99,21 @@ var app = {
 	view: function(data) {
 		var u = data.user;
 		return [
-			H1({ text: u.name }),
-			BUTTON({ type: "button", toggle: u.hide }, "Toggle hide"),
-			DIV({ class: "fBox", toggleFadeDown: u.hide }, [
-				INPUT({ name: "name", value: u.name }),
-				DIV("Model name value: " + u.name())
+			// H1({ text: u.name }),
+			// BUTTON({ type: "button", toggle: u.hide }, "Toggle hide"),
+			// DIV({ class: "fBox", toggleFadeDown: u.hide }, [
+			// 	INPUT({ name: "name", value: u.name }),
+			// 	DIV("Model name value: " + u.name())
+			// ]),
+
+			// BUTTON({ type: "button", toggle: u.fadeDown }, "Fade down"),
+			// DIV({ class: "eBox", toggleFadeDown: u.fadeDown }),
+
+			//	hehe: http://www.google.com/design/spec/animation/delightful-details.html
+			//BUTTON({ type: "button", toggle: u.spinCWFade }, "Spin CW fade"),
+			DIV({ class: "boxSurround", toggle: u.spinCWFade}, [
+				DIV({ class: "eBox icon", toggleSpinCWFade: u.spinCWFade }),
+				DIV({ class: "eBox alt1 icon", toggleReverseSpinCCWFade: u.spinCWFade })
 			])
 		];
 	}
@@ -84,9 +125,9 @@ m.module(document.getElementById('content'), app);
 
 <script>
 //	Demonstrate external access to the model
-document.getElementById('setValueButton').onclick = function(){
-	model.name("John Smith");
-};
+// document.getElementById('setValueButton').onclick = function(){
+// 	model.name("John Smith");
+// };
 </script>
 
 </body>
