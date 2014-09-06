@@ -19,8 +19,13 @@
 		"useful",
 		"jsguy"
 	],
-	"devDependencies": {
+	"dependencies": {
 		"mithril": "~0.1.21",
+		"mithril.sugartags": "git://github.com/jsguy/mithril.sugartags#master",
+		"mithril.templates": "git://github.com/jsguy/mithril.templates#master",
+		"mithril.bindings": "git://github.com/jsguy/mithril.bindings#master"
+	},
+	"devDependencies": {
 		"grunt":  "0.4.x",
 		"grunt-cli":  "0.1.9",
 		"grunt-contrib-uglify":  "0.2.x",

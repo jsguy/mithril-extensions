@@ -1,7 +1,7 @@
 module.exports = function(grunt) {
 
 	//	Concatenation file order
-	var concatFiles = ['node_modules/mithril/mithril.js', '../mithril.sugartags/mithril.sugartags.js', '../mithril.bindings/mithril.bindings.js', '../mithril.templates/mithril.templates.js'];
+	var concatFiles = ['node_modules/mithril/mithril.js', 'node_modules/mithril.sugartags/mithril.sugartags.js', 'node_modules/mithril.bindings/mithril.bindings.js', 'node_modules/mithril.templates/mithril.templates.js'];
 
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'),
