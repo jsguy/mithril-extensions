@@ -200,46 +200,42 @@
 			inProgress = true;
 			data(self, 'inProgress', inProgress);
 
-			var doTrans = function () {
-				var time = getTimeinMS(props.TransitionDuration) || 0;
+			var time = getTimeinMS(props.TransitionDuration) || 0;
 
-				//	Add a timeout to process the next queued transition
-				//	Note: We do not use the native browser callbacks,
-				//	(eg: transitionEnd), as they won't run if there is 
-				//	nothing to animate, (eg: try and animate tp the same value), 
-				//	and as such are not useful for us.
-				if(!isNaN(time)) {
-					timeQueue.push(setTimeout(function(){
-						process();
-					}, time));
-					data(self, 'timeQueue', timeQueue);
+			//	Add a timeout to process the next queued transition
+			//	Note: We do not use the native browser callbacks,
+			//	(eg: transitionEnd), as they won't run if there is 
+			//	nothing to animate, (eg: try and animate to the same value), 
+			//	and as such are not useful for us.
+			if(!isNaN(time)) {
+				timeQueue.push(setTimeout(function(){
+					process();
+				}, time));
+				data(self, 'timeQueue', timeQueue);
+			}
+
+			//	Save old properties that do not have anything to do with trans
+			var oldProps = {};
+			transitionProps.map(function(prop, idx){
+				var theProp = self.style[prop];
+				if(theProp) {
+					oldProps[prop] = theProp;
 				}
+			});
 
-				//	Save old properties that do not have anything to do with trans
-				var oldProps = {};
-				transitionProps.map(function(prop, idx){
-					var theProp = self.style[prop];
-					if(theProp) {
-						oldProps[prop] = theProp;
-					}
-				});
+			propQueue.push(oldProps);
+			data(self, 'propQueue', propQueue);
 
-				propQueue.push(oldProps);
-				data(self, 'propQueue', propQueue);
-
-				if(canTrans) {
-					setStyleProps(self, props);
-				} else {
-					//	Fallback to jQuery - note this will override your elemnets config object!
-					if(typeof $ !== 'undefined' && $.fn && $.fn.animate) {
-						self.config = function(element){
-							$(element).animate(props, getTimeinMS(props.TransitionDuration));
-						}
+			if(canTrans) {
+				setStyleProps(self, props);
+			} else {
+				//	Fallback to jQuery - note this will override your elemnets config object!
+				if(typeof $ !== 'undefined' && $.fn && $.fn.animate) {
+					self.config = function(element){
+						$(element).animate(props, getTimeinMS(props.TransitionDuration));
 					}
 				}
-			};
-
-			doTrans();
+			}
 		}
 
 		return this;

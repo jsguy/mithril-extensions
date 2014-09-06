@@ -33,10 +33,37 @@
 </head>
 <body>
 <h1>Mithril.animate - bindable animations</h1>
+<p>
+	A compact library that allows you to bind animations to properties on your elements. Couldn't be simpler, for example:
+</p>
+<pre><code>
+//	Add custom animation binding
+m.addBinding("aniFadeShrink", function(prop){
+	var value = m.unwrap(prop)? 0: 1;
+	m.animate(this, { 
+		opacity: value, 
+		scale: value
+	});
+});
+
+//	Basic animation examples
+var app = {
+	model: function() {
+		this.fadeShrink = m.p();
+	},
+	controller: function() {
+		this.model = new app.model();
+	},
+	view: function(data) {
+		var o = data.model;
+		return [
+			BUTTON({ type: "button", toggle: u.fadeShrink }, "Toggle fade shrink"),
+			DIV({ class: "eBox", aniFadeShrink: u.fadeShrink })
+		];
+	}
+};	
+</code></pre>
 <div id="content"></div>
-<!--
-<button type="button" id="setValueButton">Set name</button>
--->
 
 <script>
 
