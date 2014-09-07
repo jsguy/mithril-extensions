@@ -71,18 +71,6 @@
 		return Math.round(result);
 	},
 
-	//	Setter/getter for data
-	data = function(obj, key, value){
-		return (typeof value !== 'undefined')? obj[key] = value: obj[key];
-	},
-
-	//	Remove data attribute
-	removeData = function(obj, key){
-		if(typeof key !== 'undefined') {
-			delete obj[key];
-		}
-	},
-
 	//	Set style properties
 	setStyleProps = function(obj, props){
 		for(var i in props) {if(props.hasOwnProperty(i)) {
@@ -90,78 +78,14 @@
 		}}
 	},
 
-	//	If an object is empty
-	isEmpty = function(object) {
-		for(var i in object) {
-			return true;
-		}
-		return false; 
-	},
-
-
-	//	See if we can trannsition
-	canTrans = supportsTransitions();
-
-	//	Main animation method - sets the properties on the 
-	m.animate = function (self, args) {
-		self.style = self.style || {};
+	//	Set props for transitions and transforms with basic defaults
+	defaultProps = function(args){
 		var props = {
 				//	ease, linear, ease-in, ease-out, ease-in-out, cubic-bezier(n,n,n,n) initial, inherit
 				TransitionTiming: "ease",
 				TransitionDuration: "0.5s",
 				TransitionProperty: "all"
-			}, p, i, tmp, tmp2, found,
-			queue = data(self, 'queue') || [], 
-			timeQueue = data(self, 'timeQueue') || [],
-			propQueue = data(self, 'propQueue') || [],
-			inProgress = data(self, 'inProgress') || false,
-
-			process = function () {
-				var tmpProps;
-
-				inProgress = false;
-				data(self, 'inProgress', inProgress);
-
-				//	Remove guarding timeout
-				if(timeQueue.length > 0) {
-					clearTimeout(timeQueue[timeQueue.length -1]);
-					timeQueue.shift();
-					data(self, 'timeQueue', timeQueue);
-				}
-
-				//	Remove properties
-				transitionProps.map(function(prop, idx){
-					var propObj = {};
-					propObj[prop] = "";
-					setStyleProps(self, propObj);
-				});
-
-				//	Add back old properties
-				tmpProps = propQueue.shift();
-				data(self, 'propQueue', propQueue);
-
-				if(!isEmpty(tmpProps)) {
-					setStyleProps(self, tmpProps);
-				}
-
-				//	Apply next transition queued
-				if(queue.length > 0) {
-					m.animate.apply(self, queue.shift());
-					data(self, 'queue', queue);
-				} else {
-					//	Remove all properties
-					removeData(self, 'queue');
-					removeData(self, 'timeQueue');
-					removeData(self, 'propQueue');
-					removeData(self, 'inProgress');
-				}
-			};
-
-		//	Ensure we initialise the queues
-		data(self, 'queue', queue);
-		data(self, 'timeQueue', timeQueue);
-		data(self, 'propQueue', propQueue);
-		data(self, 'inProgress', inProgress);
+			}, p, i, tmp, tmp2, found;
 
 		//	Set any allowed properties 
 		for(p in args) { if(args.hasOwnProperty(p)) {
@@ -192,53 +116,86 @@
 				props[p] = args[p];
 			}
 		}}
+		return props;
+	},
 
-		if(inProgress) {
-			queue.push(arguments);
-			data(self, 'queue', queue);
-		} else {
-			inProgress = true;
-			data(self, 'inProgress', inProgress);
+	//	If an object is empty
+	isEmpty = function(obj) {
+		for(var i in obj) {if(obj.hasOwnProperty(i)) {
+			return false;
+		}}
+		return true; 
+	},
 
-			var time = getTimeinMS(props.TransitionDuration) || 0;
+	//	See if we can use transitions
+	canTrans = supportsTransitions();
 
-			//	Add a timeout to process the next queued transition
-			//	Note: We do not use the native browser callbacks,
-			//	(eg: transitionEnd), as they won't run if there is 
-			//	nothing to animate, (eg: try and animate to the same value), 
-			//	and as such are not useful for us.
-			if(!isNaN(time)) {
-				timeQueue.push(setTimeout(function(){
-					process();
-				}, time));
-				data(self, 'timeQueue', timeQueue);
-			}
+	//	Main animation method - sets the properties on the object that represents the element
+	//	Note: due to how mithril handles redraws for "on" events, this code will run 
+	//	each time any "on" event is fired. The good news is that the DOM won't be rerendered
+	//	as it uses the "diff" strategy, but the reality is, we don't really want this to run,
+	//	it would be nice to be able to avoid it.
+	m.animate = function (self, args) {
+		var oldConfig = self.config;
 
-			//	Save old properties that do not have anything to do with trans
-			var oldProps = {};
-			transitionProps.map(function(prop, idx){
-				var theProp = self.style[prop];
-				if(theProp) {
-					oldProps[prop] = theProp;
-				}
-			});
-
-			propQueue.push(oldProps);
-			data(self, 'propQueue', propQueue);
-
-			if(canTrans) {
-				setStyleProps(self, props);
-			} else {
-				//	Fallback to jQuery - note this will override your elemnets config object!
-				if(typeof $ !== 'undefined' && $.fn && $.fn.animate) {
-					self.config = function(element){
-						$(element).animate(props, getTimeinMS(props.TransitionDuration));
-					}
-				}
+		//	Use config so we can access the element - we need to be able to
+		//	remove transition/transform attributes after the animation is done,
+		//	and this seems the only way. Note: the animation will work on a
+		//	vDOM element, but we cannot remove the old attributes
+		self.config = function(element, isInitialised, ctx){
+			m.animateElement(element, args);
+			//	Run old config method, if one were supplied
+			if(oldConfig) {
+				oldConfig.apply(self, arguments);
 			}
 		}
+	};
 
-		return this;
+	//	Animate an element, correctly restoring properties we might change
+	m.animateElement = function(el, args){
+		el.style = el.style || {};
+		var props = defaultProps(args);
+
+		//	Save old properties
+		var oldProps = {};
+		transitionProps.map(function(prop, idx){
+			var theProp = el.style[prop];
+			if(theProp) {
+				oldProps[prop] = theProp;
+			}
+		});
+		if(el.style['transform']) {
+			oldProps['transform'] = el.style['transform'];
+		}
+
+		var time = getTimeinMS(props.TransitionDuration) || 0;
+
+		clearTimeout(el.propTimer);
+
+		//	To restore old props
+		el.propTimer = setTimeout(function(){
+			//	Remove our used properties
+			transitionProps.map(function(prop){
+				var propObj = {};
+				propObj[prop] = "";
+				setStyleProps(el, propObj);
+			});
+
+			//	Add back old properties
+			if(!isEmpty(oldProps)) {
+				setStyleProps(el, oldProps);
+			}
+		}, time);
+
+		//	See if we support transitions
+		if(canTrans) {
+			setStyleProps(el, props);
+		} else {
+			//	Try and fall back to jQuery
+			if(typeof $ !== 'undefined' && $.fn && $.fn.animate) {
+				$(el).animate(props, getTimeinMS(props.TransitionDuration));
+			}
+		}
 	};
 
 }(window.m || {}));
